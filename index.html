@@ -37,14 +37,15 @@
 
         function base64Decode(str) {
             try {
-                return decodeURIComponent(escape(atob(str)));
+                return decodeURIComponent(escape(atob(str.replace(/-/g, '+').replace(/_/g, '/'))));
             } catch (e) {
+                console.error(e);
                 return "";
             }
         }
 
         function base64Encode(str) {
-            return btoa(unescape(encodeURIComponent(str)));
+            return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_');
         }
 
         function updatePreview() {
@@ -63,10 +64,14 @@
             restoreLink.textContent = restoreLink.href;
         }
 
-        const initialContent = base64Decode(getQueryParam("contents"));
-        document.getElementById("htmlInput").value = initialContent;
-        updatePreview();
-        document.getElementById("htmlInput").addEventListener("input", updatePreview);
+        document.addEventListener("DOMContentLoaded", () => {
+            const initialContent = base64Decode(getQueryParam("contents"));
+            const inputElement = document.getElementById("htmlInput");
+            
+            inputElement.value = initialContent;
+            inputElement.addEventListener("input", updatePreview);
+            inputElement.dispatchEvent(new Event("input"));
+        });
     </script>
 </body>
 </html>

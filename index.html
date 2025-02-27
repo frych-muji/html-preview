@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Preview</title>
+    <style>
+        body
+        .container { display: flex; }
+        .editor { width: 30%; padding: 10px; background: #333; }
+        .editor textarea { width: 100%; height: 90vh; background: #222; color: white; border: none; padding: 10px; }
+        .preview { width: 70%; padding: 10px; background: #444; }
+        .preview iframe { width: 100%; height: 90vh; background: white; border: none; }
+        .link-container { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>HTML PREVIEW</h1>
+    <div class="container">
+        <div class="editor">
+            <h2>HTMLテキスト</h2>
+            <textarea id="htmlInput"></textarea>
+        </div>
+        <div class="preview">
+            <h2>プレビュー</h2>
+            <iframe id="previewFrame"></iframe>
+        </div>
+    </div>
+    <div class="link-container">
+        <a id="restoreLink" href="#">復元リンク</a>
+    </div>
+    <script>
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function base64Decode(str) {
+            try {
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                return "";
+            }
+        }
+
+        function base64Encode(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function updatePreview() {
+            const htmlContent = document.getElementById("htmlInput").value;
+            const iframe = document.getElementById("previewFrame").contentWindow.document;
+            iframe.open();
+            iframe.write(htmlContent);
+            iframe.close();
+            updateRestoreLink(htmlContent);
+        }
+
+        function updateRestoreLink(content) {
+            const encoded = base64Encode(content);
+            const restoreLink = document.getElementById("restoreLink");
+            restoreLink.href = `?contents=${encoded}`;
+            restoreLink.textContent = restoreLink.href;
+        }
+
+        const initialContent = base64Decode(getQueryParam("contents"));
+        document.getElementById("htmlInput").value = initialContent;
+        updatePreview();
+        document.getElementById("htmlInput").addEventListener("input", updatePreview);
+    </script>
+</body>
+</html>
